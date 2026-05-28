@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plataforma UTSC — MEC04C</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --g:#005930;--gl:#e8f5ee;--gm:#009a52;--gd:#003d20;
+  --gold:#c8a84b;--gold-l:#faf4e3;
+  --s:#fff;--s2:#f7f9f8;--s3:#eef2f0;
+  --bd:rgba(0,89,48,.12);--bds:rgba(0,89,48,.22);
+  --t:#0a1a12;--t2:#3a5446;--t3:#6a8a78;
+  --sh:0 2px 12px rgba(0,89,48,.08);--shl:0 8px 32px rgba(0,89,48,.12);
+  --r:14px;--rs:8px;--rx:22px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--s2);color:var(--t);min-height:100vh;overflow-x:hidden;}
+.hidden{display:none!important;}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 80% 10%,rgba(0,89,48,.05) 0%,transparent 50%),radial-gradient(circle at 10% 90%,rgba(200,168,75,.04) 0%,transparent 40%);pointer-events:none;z-index:0;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{background:var(--bds);border-radius:99px;}
+
+/* LOGIN */
+#login-page{position:relative;z-index:10;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem 1rem;}
+.lcard{background:var(--s);border:1px solid var(--bd);border-radius:var(--rx);box-shadow:var(--shl);width:100%;max-width:420px;overflow:hidden;}
+.lhdr{background:var(--g);padding:2rem 2rem 1.5rem;text-align:center;position:relative;overflow:hidden;}
+.lhdr::before{content:'UTSC';position:absolute;font-family:'Syne',sans-serif;font-weight:800;font-size:100px;color:rgba(255,255,255,.04);top:-20px;right:-10px;letter-spacing:-4px;pointer-events:none;}
+.llogo{width:56px;height:56px;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.25);border-radius:var(--r);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;}
+.llogo span{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:white;}
+.ltitle{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:white;letter-spacing:-.5px;}
+.lbadge{display:inline-block;margin-top:6px;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.65);background:rgba(255,255,255,.1);padding:3px 10px;border-radius:99px;}
+.lbody{padding:1.75rem 2rem 2rem;}
+.rtabs{display:flex;background:var(--s3);border-radius:var(--rs);padding:4px;margin-bottom:1.5rem;}
+.rtab{flex:1;padding:8px;border:none;background:transparent;border-radius:6px;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;color:var(--t3);cursor:pointer;transition:all .2s;}
+.rtab.active{background:var(--s);color:var(--g);box-shadow:var(--sh);}
+.fld{margin-bottom:1rem;}
+.fld label{display:block;font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;}
+.fld input{width:100%;padding:10px 14px;border:1.5px solid var(--bd);border-radius:var(--rs);font-size:14px;font-family:'DM Sans',sans-serif;background:var(--s2);color:var(--t);outline:none;transition:border-color .2s,box-shadow .2s;}
+.fld input:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(0,89,48,.1);background:white;}
+.hint{margin-top:6px;font-size:11px;color:var(--t3);display:flex;align-items:center;gap:6px;}
+.hint code{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--g);background:var(--gl);padding:2px 7px;border-radius:5px;}
+.btn-p{width:100%;padding:12px;background:var(--g);color:white;border:none;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.3px;}
+.btn-p:hover{background:var(--gd);transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,89,48,.25);}
+
+/* MODAL */
+#modal-pwd{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:999;padding:1rem;}
+.mbox{background:white;border-radius:var(--rx);padding:2rem;max-width:360px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.18);}
+.mbox h3{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:.4rem;}
+.mbox p{font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:1.25rem;}
+
+/* NOTIFICATION PANEL */
+#notif-panel{position:fixed;top:60px;right:0;width:340px;height:calc(100vh - 60px);background:#0d1f16;border-left:1px solid rgba(255,255,255,.08);z-index:200;overflow-y:auto;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+#notif-panel.open{transform:translateX(0);}
+.notif-hdr{padding:1rem 1.25rem;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;}
+.notif-hdr h3{font-size:13px;font-weight:700;color:white;font-family:'Syne',sans-serif;}
+.notif-close{background:none;border:none;color:rgba(255,255,255,.4);font-size:18px;cursor:pointer;padding:2px 6px;}
+.notif-item{padding:12px 1.25rem;border-bottom:1px solid rgba(255,255,255,.05);display:flex;gap:10px;align-items:flex-start;}
+.notif-item.unread{background:rgba(0,89,48,.15);}
+.notif-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+.nd-warn{background:#f59e0b;}
+.nd-alert{background:#ef4444;}
+.nd-info{background:#3b82f6;}
+.nd-ok{background:#34d399;}
+.notif-body{flex:1;}
+.notif-title{font-size:12px;font-weight:600;color:white;line-height:1.3;margin-bottom:3px;}
+.notif-sub{font-size:11px;color:rgba(255,255,255,.45);line-height:1.4;}
+.notif-time{font-size:10px;color:rgba(255,255,255,.25);margin-top:4px;font-family:'DM Mono',monospace;}
+
+/* TOPBAR */
+.topbar{background:var(--s);border-bottom:1px solid var(--bd);padding:0 1.5rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--sh);}
+.tbrand{display:flex;align-items:center;gap:10px;}
+.bicon{width:36px;height:36px;background:var(--g);border-radius:10px;display:flex;align-items:center;justify-content:center;}
+.bicon span{font-family:'Syne',sans-serif;font-weight:800;font-size:14px;color:white;}
+.bname{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--t);}
+.bperiod{font-size:11px;color:var(--t3);margin-top:1px;}
+.tright{display:flex;align-items:center;gap:8px;}
+.uchip{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--bd);border-radius:99px;padding:5px 12px 5px 5px;}
+.uav{width:26px;height:26px;background:var(--g);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:white;}
+.uemail{font-size:12px;color:var(--t2);font-weight:500;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.btn-notif{position:relative;padding:7px 10px;background:transparent;border:1px solid var(--bd);border-radius:var(--rs);font-size:16px;cursor:pointer;transition:all .2s;line-height:1;}
+.btn-notif:hover{background:var(--gl);}
+.notif-badge{position:absolute;top:-4px;right:-4px;background:#ef4444;color:white;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid white;}
+.btn-lo{padding:7px 14px;background:transparent;border:1px solid var(--bd);border-radius:var(--rs);font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;color:#b91c1c;cursor:pointer;transition:all .2s;}
+.btn-lo:hover{background:#fef2f2;border-color:#fca5a5;}
+
+/* MAIN GRID */
+.mgrid{display:grid;grid-template-columns:300px 1fr;gap:1.5rem;padding:1.5rem;max-width:1200px;margin:0 auto;align-items:start;}
+@media(max-width:900px){.mgrid{grid-template-columns:1fr;}}
+
+/* CARDS */
+.card{background:var(--s);border:1px solid var(--bd);border-radius:var(--r);padding:1.25rem;box-shadow:var(--sh);}
+.card+.card{margin-top:1rem;}
+.ctit{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:.9rem;display:flex;align-items:center;gap:6px;}
+.ctitlg{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--t);margin-bottom:.75rem;letter-spacing:-.3px;}
+
+/* PROFILE */
+.phead{display:flex;align-items:center;gap:12px;padding-bottom:1rem;margin-bottom:1rem;border-bottom:1px solid var(--bd);}
+.pav{width:46px;height:46px;background:var(--g);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:white;flex-shrink:0;}
+.pname{font-size:13px;font-weight:600;color:var(--t);line-height:1.3;}
+.bgrupo{display:inline-block;margin-top:4px;font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--g);background:var(--gl);padding:2px 8px;border-radius:5px;}
+.mrow{display:flex;gap:1rem;margin-top:.75rem;}
+.mitem{flex:1;}
+.mlbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);margin-bottom:2px;}
+.mval{font-size:12px;font-weight:600;color:var(--t2);font-family:'DM Mono',monospace;}
+.mi{display:flex;flex-direction:column;padding:10px 12px;background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);margin-bottom:6px;transition:border-color .2s;cursor:default;}
+.mi:hover{border-color:var(--gm);}
+.mn{font-size:12px;font-weight:600;color:var(--t);}
+.mp{font-size:11px;color:var(--t3);margin-top:2px;}
+.sep{height:1px;background:var(--bd);margin:1rem 0;}
+
+/* SCHEDULE */
+.stbl{width:100%;min-width:680px;border-collapse:collapse;font-size:11.5px;}
+.stbl thead th{background:var(--g);color:white;padding:10px 12px;font-weight:600;letter-spacing:.3px;text-align:left;}
+.stbl thead th:first-child{border-radius:var(--rs) 0 0 0;width:100px;}
+.stbl thead th:last-child{border-radius:0 var(--rs) 0 0;}
+.stbl td{padding:9px 11px;border:1px solid var(--bd);vertical-align:top;}
+.stbl tr:nth-child(even) td{background:var(--s2);}
+.thora{font-family:'DM Mono',monospace;font-size:10.5px;color:var(--t2);font-weight:500;background:var(--s3)!important;white-space:nowrap;}
+.tcls strong{display:block;font-size:11.5px;font-weight:600;color:var(--t);line-height:1.3;}
+.tcls span{font-size:10px;color:var(--t3);}
+.tlibre{color:var(--t3);font-style:italic;font-size:11px;}
+.tcls::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;vertical-align:2px;background:var(--gm);}
+
+/* SEMANAS */
+.wrow{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;}
+.wbtn{flex-shrink:0;width:52px;padding:8px 4px;border:1.5px solid var(--bd);background:var(--s2);border-radius:var(--rs);text-align:center;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.wbtn:hover{border-color:var(--g);background:var(--gl);}
+.wbtn.cur{border-color:var(--g);background:var(--g);color:white;}
+.wbtn.past{opacity:.55;}
+.wlbl{font-size:9px;opacity:.7;display:block;text-transform:uppercase;letter-spacing:.5px;}
+.wnum{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;line-height:1;display:block;}
+.whoy{font-size:8px;color:var(--gold);font-weight:700;letter-spacing:.5px;display:block;}
+.winfo{margin-top:1rem;padding:12px 14px;background:var(--gl);border:1px solid rgba(0,89,48,.15);border-radius:var(--rs);border-left:4px solid var(--g);}
+.wilbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--g);margin-bottom:4px;}
+.witxt{font-size:12.5px;color:var(--t2);line-height:1.5;}
+
+/* KANBAN */
+.kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+@media(max-width:700px){.kanban{grid-template-columns:1fr 1fr;}}
+.kol{border-radius:var(--rs);padding:10px;min-height:80px;}
+.ktodo{background:#fef2f2;border:1px solid #fecaca;}
+.kdoing{background:#eff6ff;border:1px solid #bfdbfe;}
+.kreview{background:#fffbeb;border:1px solid #fde68a;}
+.kdone{background:#f0fdf4;border:1px solid #bbf7d0;}
+.khead{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid rgba(0,0,0,.07);}
+.ktodo .khead{color:#991b1b;}.kdoing .khead{color:#1d4ed8;}.kreview .khead{color:#92400e;}.kdone .khead{color:#166534;}
+.ktask{background:white;border-radius:8px;padding:10px;margin-bottom:6px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.05);}
+.kttl{font-size:12px;font-weight:600;color:var(--t);line-height:1.3;}
+.ktsub{font-size:10.5px;color:var(--t3);margin-top:3px;}
+.kbdg{display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 6px;border-radius:4px;margin-bottom:5px;}
+.bred{background:#fee2e2;color:#991b1b;}.bblue{background:#dbeafe;color:#1d4ed8;}.bamb{background:#fef3c7;color:#92400e;}.bgrn{background:#dcfce7;color:#166534;}
+.kmove{display:block;width:100%;margin-top:8px;padding:5px;font-size:10px;font-weight:600;font-family:'DM Sans',sans-serif;border:1px solid rgba(0,0,0,.1);border-radius:5px;background:var(--s2);color:var(--t2);cursor:pointer;transition:all .2s;text-align:center;}
+.kmove:hover{background:var(--gl);color:var(--g);border-color:var(--g);}
+.ktdone .kttl{text-decoration:line-through;color:var(--t3);}
+
+/* TEAM */
+.tform input{width:100%;padding:9px 12px;border:1.5px solid var(--bd);border-radius:var(--rs);font-size:12px;font-family:'DM Sans',sans-serif;background:var(--s2);color:var(--t);outline:none;margin-bottom:7px;transition:border-color .2s;}
+.tform input:focus{border-color:var(--g);background:white;}
+.btnlnk{width:100%;padding:9px;background:var(--g);color:white;border:none;border-radius:var(--rs);font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;}
+.btnlnk:hover{background:var(--gd);}
+.tinf{background:var(--gl);border:1px solid rgba(0,89,48,.15);border-radius:var(--rs);padding:10px 12px;}
+.tproj{font-size:12px;font-weight:700;color:var(--g);margin-bottom:6px;}
+.tmemb{list-style:none;}
+.tmemb li{font-size:11px;color:var(--t2);padding:3px 0;border-bottom:1px solid rgba(0,89,48,.08);display:flex;align-items:center;gap:6px;}
+.tmemb li::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gm);}
+
+/* ── TEACHER ── */
+.tbg{background:#0a1a12;min-height:100vh;}
+#teacher-app .topbar{background:#0a1a12;border-color:rgba(255,255,255,.08);}
+#teacher-app .topbar .bname{color:#e8f5ee;}
+#teacher-app .topbar .bperiod{color:rgba(255,255,255,.4);}
+#teacher-app .topbar .uchip{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1);}
+#teacher-app .topbar .uemail{color:#a0bfad;}
+#teacher-app .topbar .btn-lo{color:#f87171;border-color:rgba(248,113,113,.25);background:transparent;}
+#teacher-app .topbar .btn-lo:hover{background:rgba(248,113,113,.08);}
+#teacher-app .topbar .btn-notif{border-color:rgba(255,255,255,.15);color:white;}
+#teacher-app .topbar .btn-notif:hover{background:rgba(255,255,255,.08);}
+
+.tgrid{display:grid;grid-template-columns:280px 1fr;gap:1.5rem;padding:1.5rem;max-width:1280px;margin:0 auto;}
+@media(max-width:900px){.tgrid{grid-template-columns:1fr;}}
+
+.dcard{background:#12261a;border:1px solid rgba(255,255,255,.07);border-radius:var(--r);padding:1.25rem;}
+.dcard+.dcard{margin-top:1rem;}
+.dlbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);margin-bottom:.9rem;}
+
+/* GROUP LIST */
+.grp-btn{width:100%;text-align:left;padding:10px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--rs);color:rgba(255,255,255,.7);font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;}
+.grp-btn:hover{background:rgba(0,89,48,.25);border-color:rgba(0,89,48,.5);color:#9fe8c0;}
+.grp-btn.active{background:rgba(0,89,48,.3);border-color:rgba(0,89,48,.6);color:#9fe8c0;border-left:3px solid var(--gm);}
+.grp-pill{font-size:9px;background:rgba(255,255,255,.08);padding:2px 7px;border-radius:99px;color:rgba(255,255,255,.4);}
+
+/* STUDENT LIST PANEL */
+.stu-panel{background:#0e2018;border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:1rem;margin-top:.75rem;}
+.stu-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;}
+.stu-hdr h4{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:white;}
+.stu-count{font-size:10px;color:rgba(255,255,255,.35);background:rgba(255,255,255,.06);padding:2px 8px;border-radius:99px;}
+.stu-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--rs);transition:background .15s;cursor:default;}
+.stu-row:hover{background:rgba(255,255,255,.04);}
+.sav{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:'DM Mono',monospace;flex-shrink:0;}
+.sinfo{flex:1;}
+.sname{font-size:11px;font-weight:600;color:rgba(255,255,255,.8);}
+.smat{font-size:10px;color:rgba(255,255,255,.35);}
+.spct{font-size:10px;font-weight:700;font-family:'DM Mono',monospace;}
+.spbar{flex:1;max-width:60px;background:rgba(255,255,255,.07);height:4px;border-radius:99px;overflow:hidden;}
+.spfill{height:100%;border-radius:99px;}
+
+/* SEMAFORO */
+.sbar{margin-top:6px;background:rgba(255,255,255,.08);height:6px;border-radius:99px;overflow:hidden;}
+.sfill{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.4,0,.2,1);}
+.slbl{font-size:11px;margin-bottom:4px;display:flex;justify-content:space-between;}
+.snm{color:rgba(255,255,255,.7);}
+.sprc{color:var(--gold);font-weight:600;}
+
+/* STATS */
+.srow{display:flex;gap:10px;margin-bottom:1rem;}
+.sbox{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--rs);padding:12px;text-align:center;}
+.sval{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:white;display:block;}
+.sval-lbl{font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.7px;}
+.cwrap{max-width:180px;margin:0 auto 1rem;}
+
+/* CALENDAR EVENTS */
+.ev-item{padding:9px 12px;border-radius:var(--rs);margin-bottom:6px;display:flex;align-items:flex-start;gap:8px;}
+.ev-warn{background:rgba(245,158,11,.1);border-left:3px solid #f59e0b;}
+.ev-danger{background:rgba(239,68,68,.1);border-left:3px solid #ef4444;}
+.ev-info{background:rgba(59,130,246,.1);border-left:3px solid #3b82f6;}
+.ev-ok{background:rgba(52,211,153,.1);border-left:3px solid #34d399;}
+.ev-purple{background:rgba(139,92,246,.1);border-left:3px solid #8b5cf6;}
+.ev-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+.edw{background:#f59e0b;}.edd{background:#ef4444;}.edi{background:#3b82f6;}.edo{background:#34d399;}.edp{background:#8b5cf6;}
+.ev-body{flex:1;}
+.ev-title{font-size:12px;font-weight:600;color:rgba(255,255,255,.85);line-height:1.3;}
+.ev-sub{font-size:10.5px;color:rgba(255,255,255,.4);margin-top:2px;}
+.ev-date{font-size:10px;font-family:'DM Mono',monospace;color:rgba(255,255,255,.3);margin-top:3px;}
+
+/* STUDENT NOTIFS (light) */
+.sev-item{padding:10px 12px;border-radius:var(--rs);margin-bottom:6px;display:flex;align-items:flex-start;gap:8px;}
+.sev-warn{background:#fffbeb;border-left:3px solid #f59e0b;}
+.sev-danger{background:#fef2f2;border-left:3px solid #ef4444;}
+.sev-info{background:#eff6ff;border-left:3px solid #3b82f6;}
+.sev-ok{background:#f0fdf4;border-left:3px solid #34d399;}
+.sev-title{font-size:12px;font-weight:600;color:var(--t);line-height:1.3;}
+.sev-sub{font-size:11px;color:var(--t2);margin-top:2px;}
+.sev-date{font-size:10px;font-family:'DM Mono',monospace;color:var(--t3);margin-top:3px;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-page">
+  <div class="lcard">
+    <div class="lhdr">
+      <div class="llogo"><span>U</span></div>
+      <div class="ltitle">Sistema UTSC</div>
+      <div class="lbadge" id="lsub">Portal de Alumnos</div>
+    </div>
+    <div class="lbody">
+      <div class="rtabs">
+        <button class="rtab active" onclick="setRole('student')" id="tab-s">🔏 Estudiante</button>
+        <button class="rtab" onclick="setRole('teacher')" id="tab-t">👨‍🏫 Docente</button>
+      </div>
+      <form onsubmit="doLogin(event)">
+        <input type="hidden" id="role-v" value="student">
+        <div class="fld">
+          <label>Correo Institucional</label>
+          <input type="email" id="ie" placeholder="al012345@utsc.edu.mx" required>
+        </div>
+        <div class="fld">
+          <label>Contraseña</label>
+          <input type="password" id="ip" placeholder="••••••••" required>
+          <div class="hint">Clave por defecto: <code id="hc">300998</code></div>
+        </div>
+        <button type="submit" class="btn-p" id="lbtn">Iniciar Sesión Estudiante</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PASSWORD -->
+<div id="modal-pwd" class="hidden">
+  <div class="mbox">
+    <div style="width:48px;height:48px;background:#faf4e3;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:1rem;">🔐</div>
+    <h3>Seguridad de la Cuenta</h3>
+    <p>Accediste con credenciales genéricas. Configura una clave única para proteger tu portafolio cuatrimestral.</p>
+    <div class="fld"><label>Nueva contraseña</label><input type="password" id="inp-np" placeholder="Mínimo 4 caracteres"></div>
+    <button class="btn-p" onclick="savePwd()">Guardar y Continuar</button>
+  </div>
+</div>
+
+<!-- NOTIFICATION PANEL -->
+<div id="notif-panel">
+  <div class="notif-hdr">
+    <h3>🔔 Avisos y Alertas</h3>
+    <button class="notif-close" onclick="toggleNotif()">✕</button>
+  </div>
+  <div id="notif-list"></div>
+</div>
+
+<!-- ══ ALUMNO ══ -->
+<div id="student-app" class="hidden">
+  <div class="topbar">
+    <div class="tbrand">
+      <div class="bicon"><span>U</span></div>
+      <div><div class="bname">Portal Integrador <span style="color:var(--g)">UTSC</span></div><div class="bperiod">Periodo Mayo–Agosto 2026</div></div>
+    </div>
+    <div class="tright">
+      <button class="btn-notif" onclick="toggleNotif()" id="stu-notif-btn">🔔<span class="notif-badge" id="stu-notif-count">0</span></button>
+      <div class="uchip"><div class="uav" id="sav">M4</div><span class="uemail" id="smail">—</span></div>
+      <button class="btn-lo" onclick="logout()">Salir</button>
+    </div>
+  </div>
+  <div class="mgrid">
+    <!-- LEFT -->
+    <div>
+      <div class="card">
+        <div class="phead">
+          <div class="pav" id="sav2">M4</div>
+          <div><div class="pname" id="sname">Cargando...</div><div class="bgrupo">MEC04C</div></div>
+        </div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);margin-bottom:3px;">Correo Institucional</div>
+        <div style="font-size:12px;color:var(--t2);font-family:'DM Mono',monospace;word-break:break-all;margin-bottom:.9rem;" id="sfull">—</div>
+        <div class="mrow">
+          <div class="mitem"><div class="mlbl">Matrícula</div><div class="mval">202403911</div></div>
+          <div class="mitem"><div class="mlbl">Grupo</div><div class="mval">MEC04C</div></div>
+        </div>
+        <div class="sep"></div>
+        <div style="font-size:11px;color:var(--t3);line-height:1.8;">
+          <strong style="color:var(--t2)">Maestra Tutora:</strong> Miroslava Martínez Ruiz<br>
+          <strong style="color:var(--t2)">Turno:</strong> Matutino · 8:20 AM – 3:50 PM<br>
+          <strong style="color:var(--t2)">Aula:</strong> EDI03
+        </div>
+      </div>
+      <div class="card" style="margin-top:1rem;">
+        <div class="ctit">📚 Materias Inscritas</div>
+        <div class="mi"><div class="mn">Sistemas de Investigación de Mercados II</div><div class="mp">Prof. Homero G. Menchaca Sillas</div></div>
+        <div class="mi"><div class="mn">Diseño Digital y Multimedia</div><div class="mp">Prof. Horacio Juárez Saucedo</div></div>
+        <div class="mi"><div class="mn">Gestión de Ventas</div><div class="mp">Prof. Julio César Estrada Saldaña</div></div>
+        <div class="mi"><div class="mn">Mezcla Promocional</div><div class="mp">Prof. Luis Eduardo Monreal Pitones</div></div>
+        <div class="mi"><div class="mn">Administración del Tiempo</div><div class="mp">Prof. Olga E. Fuentes Martínez</div></div>
+        <div class="mi"><div class="mn">Inglés IV</div><div class="mp">Prof. María Cristina Rodríguez Treviño</div></div>
+        <div class="mi"><div class="mn">Ética Profesional</div><div class="mp">Prof. Isaac E. Pérez Castillo</div></div>
+        <div class="mi" style="margin-bottom:0;"><div class="mn">Tutoría Académica</div><div class="mp">Prof. Miroslava Martínez Ruiz</div></div>
+      </div>
+
+      <!-- Avisos alumno -->
+      <div class="card" style="margin-top:1rem;">
+        <div class="ctit">🔔 Mis Avisos y Recordatorios</div>
+        <div id="stu-notif-inline"></div>
+      </div>
+
+      <div class="card" style="margin-top:1rem;">
+        <div class="ctit">👥 Vinculación de Equipo</div>
+        <div id="tfw" class="tform">
+          <input type="text" id="iproj" placeholder="Nombre del proyecto integrador">
+          <input type="email" id="iinv" placeholder="Correo compañero UTSC">
+          <button class="btnlnk" onclick="createTeam()">Vincular Equipo</button>
+        </div>
+        <div id="tiw" class="hidden">
+          <div class="tinf"><div class="tproj" id="tpname">—</div><ul class="tmemb" id="tmemb"><li>Líder de Proyecto (Tú)</li></ul></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div>
+      <div class="card">
+        <div class="ctitlg">📆 Distribución Horaria — Aula EDI03</div>
+        <div style="font-size:11px;color:var(--t3);margin-bottom:1rem;">Esquema oficial MEC04C · Periodo Mayo–Agosto 2026</div>
+        <div style="overflow-x:auto;">
+          <table class="stbl">
+            <thead><tr><th>Hora</th><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th></tr></thead>
+            <tbody>
+              <tr><td class="thora">8:20–9:10</td><td class="tlibre">— Libre</td><td class="tcls"><strong>Inglés IV</strong><span>M. C. Rodríguez</span></td><td class="tcls" rowspan="2"><strong>Sist. Invest. Mercados II</strong><span>H. G. Menchaca</span></td><td class="tcls" rowspan="2"><strong>Diseño Digital y Mult.</strong><span>H. Juárez</span></td><td class="tcls"><strong>Gestión de Ventas</strong><span>J. C. Estrada</span></td></tr>
+              <tr><td class="thora">9:10–10:00</td><td class="tcls" rowspan="2"><strong>Sist. Invest. Mercados II</strong><span>H. G. Menchaca</span></td><td class="tcls"><strong>Diseño Digital y Mult.</strong><span>H. Juárez</span></td><td class="tlibre">— Libre</td></tr>
+              <tr><td class="thora">10:00–10:50</td><td class="tcls"><strong>Sist. Invest. Mercados II</strong><span>H. G. Menchaca</span></td><td class="tcls"><strong>Gestión de Ventas</strong><span>J. C. Estrada</span></td><td class="tcls" rowspan="2"><strong>Inglés IV</strong><span>M. C. Rodríguez</span></td><td class="tcls" rowspan="2"><strong>Ética Profesional</strong><span>I. E. Pérez</span></td></tr>
+              <tr><td class="thora">10:50–11:40</td><td class="tlibre">— Libre</td><td class="tlibre">— Libre</td><td class="tlibre">— Libre</td></tr>
+              <tr><td class="thora">11:40–12:30</td><td class="tcls"><strong>Inglés IV</strong><span>M. C. Rodríguez</span></td><td class="tcls"><strong>Mezcla Promocional</strong><span>L. E. Monreal</span></td><td class="tcls"><strong>Diseño Digital y Mult.</strong><span>H. Juárez</span></td><td class="tcls"><strong>Gestión de Ventas</strong><span>J. C. Estrada</span></td><td class="tcls"><strong>Tutoría Académica</strong><span>M. Martínez Ruiz</span></td></tr>
+              <tr><td class="thora">13:20–14:10</td><td class="tcls"><strong>Ética Profesional</strong><span>I. E. Pérez</span></td><td class="tcls"><strong>Administración del Tiempo</strong><span>O. E. Fuentes</span></td><td class="tcls"><strong>Administración del Tiempo</strong><span>O. E. Fuentes</span></td><td class="tcls"><strong>Mezcla Promocional</strong><span>L. E. Monreal</span></td><td class="tcls"><strong>Mezcla Promocional</strong><span>L. E. Monreal</span></td></tr>
+              <tr><td class="thora">15:00–15:50</td><td style="font-size:10px;color:var(--t3);">Reval. I. E. Pérez</td><td style="font-size:10px;color:var(--t3);">Reval. H. Juárez / O. Fuentes</td><td style="font-size:10px;color:var(--t3);">Reval. H. Menchaca / M. Cristina</td><td style="font-size:10px;color:var(--t3);">Reval. J. C. Estrada</td><td style="font-size:10px;color:var(--t3);">Reval. L. E. Monreal</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:1rem;">
+        <div class="ctitlg">⏳ Línea de Tiempo Cuatrimestral</div>
+        <div style="font-size:11px;color:var(--t3);margin-bottom:.9rem;">Toca una semana para ver el desglose de entregables.</div>
+        <div class="wrow" id="weeks-row"></div>
+        <div class="winfo"><div class="wilbl" id="wilbl">Semana 6 · Segundo Parcial (Actual)</div><div class="witxt" id="witxt">Integración de componentes y pruebas de validación del proyecto integrador.</div></div>
+      </div>
+
+      <div class="card" style="margin-top:1rem;">
+        <div class="ctitlg">📋 Planeación de Actividades Integradoras</div>
+        <div class="kanban">
+          <div class="kol ktodo"><div class="khead">📌 Por hacer</div><div id="k-todo">
+            <div class="ktask" id="kt1"><div class="kbdg bred">Rezago</div><div class="kttl">Programar la interfaz</div><div class="ktsub">Avance: 20%</div><button class="kmove" onclick="moveTask('kt1','k-doing')">Iniciar →</button></div>
+          </div></div>
+          <div class="kol kdoing"><div class="khead">⚡ En proceso</div><div id="k-doing">
+            <div class="ktask" id="kt2"><div class="kbdg bblue">En curso</div><div class="kttl">Redactar marco teórico</div><button class="kmove" onclick="moveTask('kt2','k-review')">Validar →</button></div>
+          </div></div>
+          <div class="kol kreview"><div class="khead">👀 Por validar</div><div id="k-review"></div></div>
+          <div class="kol kdone"><div class="khead">✅ Terminado</div><div id="k-done"><div class="ktask ktdone"><div class="kttl">Estructuración de campaña</div></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DOCENTE ══ -->
+<div id="teacher-app" class="hidden">
+  <div class="tbg">
+    <div class="topbar">
+      <div class="tbrand">
+        <div class="bicon"><span>U</span></div>
+        <div><div class="bname">Panel Docente <span style="color:var(--gm)">UTSC</span></div><div class="bperiod">Periodo Mayo–Agosto 2026</div></div>
+      </div>
+      <div class="tright">
+        <button class="btn-notif" onclick="toggleNotif()" id="tch-notif-btn">🔔<span class="notif-badge" id="tch-notif-count">0</span></button>
+        <div class="uchip"><div class="uav" style="background:#1d4ed8;" id="tav">D</div><span class="uemail" id="tmail">—</span></div>
+        <button class="btn-lo" onclick="logout()">Salir</button>
+      </div>
+    </div>
+
+    <div class="tgrid">
+      <!-- SIDEBAR -->
+      <div>
+        <div class="dcard">
+          <div class="dlbl">🏫 Mis Grupos</div>
+          <button class="grp-btn active" id="grp-MEC04A" onclick="selectGroup('MEC04A')">
+            <span>Mercadotecnia 4°A</span><span class="grp-pill">28 alumnos</span>
+          </button>
+          <button class="grp-btn" id="grp-MEC04B" onclick="selectGroup('MEC04B')">
+            <span>Mercadotecnia 4°B</span><span class="grp-pill">26 alumnos</span>
+          </button>
+          <button class="grp-btn" id="grp-MEC04C" onclick="selectGroup('MEC04C')">
+            <span>Mercadotecnia 4°C</span><span class="grp-pill">30 alumnos</span>
+          </button>
+          <button class="grp-btn" id="grp-MEC04D" onclick="selectGroup('MEC04D')">
+            <span>Mercadotecnia 4°D</span><span class="grp-pill">25 alumnos</span>
+          </button>
+
+          <!-- STUDENT LIST -->
+          <div class="stu-panel">
+            <div class="stu-hdr">
+              <h4 id="grp-title">Mercadotecnia 4°A</h4>
+              <span class="stu-count" id="grp-count">28 alumnos</span>
+            </div>
+            <div id="stu-list"></div>
+          </div>
+        </div>
+
+        <div class="dcard">
+          <div class="dlbl">🚦 Semáforo de Desempeño</div>
+          <div id="semaforo-wrap"></div>
+        </div>
+
+        <div class="dcard">
+          <div class="dlbl">📅 Próximos Eventos del Calendario</div>
+          <div id="cal-events"></div>
+        </div>
+      </div>
+
+      <!-- MAIN CONTENT -->
+      <div>
+        <div class="srow">
+          <div class="sbox"><span class="sval" id="t-stat-alumnos">28</span><span class="sval-lbl">Alumnos activos</span></div>
+          <div class="sbox"><span class="sval" id="t-stat-equipos">6</span><span class="sval-lbl">Equipos vinculados</span></div>
+          <div class="sbox"><span class="sval" id="t-stat-pct" style="color:#f59e0b;">35%</span><span class="sval-lbl">Avance global</span></div>
+          <div class="sbox"><span class="sval" id="t-stat-tareas" style="color:#ef4444;">3</span><span class="sval-lbl">Tareas en riesgo</span></div>
+        </div>
+
+        <div class="dcard">
+          <div class="dlbl">Métricas del grupo seleccionado</div>
+          <div class="cwrap"><canvas id="tchart"></canvas></div>
+          <div style="display:flex;gap:1rem;font-size:11px;justify-content:center;margin-bottom:1rem;">
+            <span style="color:#34d399;display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#34d399;"></span> Aportación</span>
+            <span style="color:#f87171;display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#f87171;"></span> Rezago</span>
+          </div>
+        </div>
+
+        <!-- AVISOS DEL DOCENTE -->
+        <div class="dcard">
+          <div class="dlbl">🔔 Avisos Automáticos del Sistema</div>
+          <div id="tch-notif-inline"></div>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <input type="text" id="obs-inp" placeholder="Agregar aviso al grupo..." style="flex:1;padding:9px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:var(--rs);font-size:12px;font-family:'DM Sans',sans-serif;color:white;outline:none;">
+            <button onclick="addObs()" style="padding:9px 16px;background:var(--g);color:white;border:none;border-radius:var(--rs);font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;">Enviar</button>
+          </div>
+        </div>
+
+        <!-- HORARIO DOCENTE -->
+        <div class="dcard">
+          <div class="dlbl">📆 Horario del Grupo Seleccionado — <span id="grp-horario-lbl">MEC04A</span></div>
+          <div style="overflow-x:auto;">
+            <table style="width:100%;min-width:600px;border-collapse:collapse;font-size:11px;">
+              <thead><tr style="background:rgba(0,89,48,.3);">
+                <th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,.6);font-weight:600;white-space:nowrap;">Hora</th>
+                <th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,.6);font-weight:600;">Lunes</th>
+                <th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,.6);font-weight:600;">Martes</th>
+                <th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,.6);font-weight:600;">Miércoles</th>
+                <th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,.6);font-weight:600;">Jueves</th>
+                <th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,.6);font-weight:600;">Viernes</th>
+              </tr></thead>
+              <tbody style="color:rgba(255,255,255,.6);">
+                <tr style="border-bottom:1px solid rgba(255,255,255,.05);"><td style="padding:7px 10px;font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.35);white-space:nowrap;">8:20–9:10</td><td style="padding:7px 10px;font-style:italic;color:rgba(255,255,255,.25);">Libre</td><td style="padding:7px 10px;">Inglés IV</td><td style="padding:7px 10px;" rowspan="2">SIM II</td><td style="padding:7px 10px;" rowspan="2">Diseño Digital</td><td style="padding:7px 10px;">Gestión Ventas</td></tr>
+                <tr style="border-bottom:1px solid rgba(255,255,255,.05);"><td style="padding:7px 10px;font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.35);">9:10–10:00</td><td style="padding:7px 10px;" rowspan="2">SIM II</td><td style="padding:7px 10px;">Diseño Digital</td><td style="padding:7px 10px;font-style:italic;color:rgba(255,255,255,.25);">Libre</td></tr>
+                <tr style="border-bottom:1px solid rgba(255,255,255,.05);"><td style="padding:7px 10px;font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.35);">10:00–10:50</td><td style="padding:7px 10px;">Gestión Ventas</td><td style="padding:7px 10px;" rowspan="2">Inglés IV</td><td style="padding:7px 10px;" rowspan="2">Ética Prof.</td></tr>
+                <tr style="border-bottom:1px solid rgba(255,255,255,.05);"><td style="padding:7px 10px;font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.35);">10:50–11:40</td><td style="padding:7px 10px;font-style:italic;color:rgba(255,255,255,.25);">Libre</td><td style="padding:7px 10px;font-style:italic;color:rgba(255,255,255,.25);">Libre</td><td style="padding:7px 10px;font-style:italic;color:rgba(255,255,255,.25);">Libre</td></tr>
+                <tr style="border-bottom:1px solid rgba(255,255,255,.05);"><td style="padding:7px 10px;font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.35);">11:40–12:30</td><td style="padding:7px 10px;">Inglés IV</td><td style="padding:7px 10px;">Mezcla Prom.</td><td style="padding:7px 10px;">Diseño Digital</td><td style="padding:7px 10px;">Gestión Ventas</td><td style="padding:7px 10px;">Tutoría</td></tr>
+                <tr style="border-bottom:1px solid rgba(255,255,255,.05);"><td style="padding:7px 10px;font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.35);">13:20–14:10</td><td style="padding:7px 10px;">Ética Prof.</td><td style="padding:7px 10px;">Admin. Tiempo</td><td style="padding:7px 10px;">Admin. Tiempo</td><td style="padding:7px 10px;">Mezcla Prom.</td><td style="padding:7px 10px;">Mezcla Prom.</td></tr>
+                <tr><td style="padding:7px 10px;font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.35);">15:00–15:50</td><td style="padding:7px 10px;color:rgba(255,255,255,.35);font-size:10px;">Reval. Pérez</td><td style="padding:7px 10px;color:rgba(255,255,255,.35);font-size:10px;">Reval. Juárez/Fuentes</td><td style="padding:7px 10px;color:rgba(255,255,255,.35);font-size:10px;">Reval. Menchaca/Cristina</td><td style="padding:7px 10px;color:rgba(255,255,255,.35);font-size:10px;">Reval. Estrada</td><td style="padding:7px 10px;color:rgba(255,255,255,.35);font-size:10px;">Reval. Monreal</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- OBS LOG -->
+        <div class="dcard">
+          <div class="dlbl">📝 Registro de Observaciones</div>
+          <div id="obs-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══ DATA ══ */
+const WEEKS={1:"Parcial 1: Planeación y planteamiento de objetivos del proyecto integrador.",2:"Parcial 1: Análisis técnico de requerimientos de mercado.",3:"Parcial 1: Presentación de alternativas y Mockups estructurales.",4:"Parcial 1: Cierre del Primer Parcial — Evaluación de Avance Técnico.",5:"Parcial 2: Prototipado, desarrollo de marcas y matrices logísticas.",6:"Parcial 2: Integración de componentes y pruebas de validación del proyecto.",7:"Parcial 2: Redacción del cuerpo de la tesina e informes cuantitativos.",8:"Parcial 2: Cierre del Segundo Parcial — Auditoría Funcional Intermedia.",9:"Parcial 3: Optimización del entregable y control de errores.",10:"Parcial 3: Ensayo general de la presentación e informes financieros.",11:"Parcial 3: Evaluación Final — Defensa del Proyecto ante Sinodales."};
+const parc=w=>w<=4?"Primer Parcial":w<=8?"Segundo Parcial":"Tercer Parcial";
+
+const NAMES_POOL=["Alejandro García López","Brenda Martínez Soto","Carlos Hernández Ruiz","Diana Flores Torres","Eduardo López Morales","Fernanda Castro Díaz","Gabriel Ramírez Vega","Heidi Sánchez Ponce","Ivan Torres Guzmán","Julia Mendoza Cruz","Kevin Ortega Reyes","Lorena Vázquez Mora","Manuel Jiménez Soto","Nancy Peña Lara","Oscar Fuentes Reyes","Paola Castillo Nava","Rodrigo Morales Vera","Sandra Núñez Ríos","Tomás Aguilar Garza","Ursula Delgado Pita","Valentina Ríos Cabrera","Ximena Salinas Bravo","Yolanda Méndez Dávila","Zaid Corona Trujillo","Adriana Leal Vargas","Benjamín Soto Mota","Cristina Ramos Parra","Daniel Flores Ávila","Elena Gutiérrez Leal","Francisco Nieto Vera"];
+const COLS=['#7c3aed','#0891b2','#059669','#d97706','#dc2626','#9333ea','#0284c7','#16a34a'];
+
+const GROUPS={
+  MEC04A:{name:"Mercadotecnia 4°A",count:28,avance:35,rezago:65,equipos:6,riesgo:3},
+  MEC04B:{name:"Mercadotecnia 4°B",count:26,avance:58,rezago:42,equipos:5,riesgo:1},
+  MEC04C:{name:"Mercadotecnia 4°C",count:30,avance:47,rezago:53,equipos:7,riesgo:2},
+  MEC04D:{name:"Mercadotecnia 4°D",count:25,avance:72,rezago:28,equipos:5,riesgo:0}
+};
+
+// Notifications based on UTSC 2026 calendar
+const NOTIFS_TEACHER=[
+  {type:'danger',dot:'edd',title:'⚠️ Tarea vence mañana — 3 equipos sin 50%',sub:'Marco teórico · MEC04A: Equipos Roja, Azul, Verde por debajo del umbral requerido.',date:'28 mayo 2026'},
+  {type:'warn',dot:'edw',title:'📅 Parcial 2 se acerca — Sem. 8',sub:'Cierre del 2do Parcial el 18 jun 2026. Recuerda subir calificaciones antes del 20 jun.',date:'27 mayo 2026'},
+  {type:'info',dot:'edi',title:'📋 Captura de calificaciones — Estadías',sub:'Periodo de captura abierto. Fecha límite según calendario institucional.',date:'27 mayo 2026'},
+  {type:'ok',dot:'edo',title:'✅ Parcial 1 completado',sub:'Todas las actas del Primer Parcial fueron enviadas a Servicios Escolares.',date:'12 may 2026'},
+  {type:'warn',dot:'edw',title:'📆 Revaloración parcial',sub:'Días de revaloración del parcial activos para grupos MEC04C. Ver horario 15:00–15:50.',date:'26 mayo 2026'},
+  {type:'danger',dot:'edd',title:'🚨 Equipo en rezago crítico — MEC04C',sub:'Equipo "Campaña Norte": interfaz digital al 20% y entrega es en 5 días.',date:'27 mayo 2026'},
+  {type:'info',dot:'edi',title:'📢 Actualización administrativa',sub:'Reunión de academia programada para esta semana según calendario UTSC.',date:'25 mayo 2026'},
+  {type:'warn',dot:'edw',title:'⏰ Recordatorio: Tutoría grupal',sub:'Sesión de tutoría académica viernes 11:40–12:30 · Todas las asignaturas activas.',date:'27 mayo 2026'},
+];
+
+const NOTIFS_STUDENT=[
+  {type:'danger',dot:'edd',title:'🚨 Tu tarea vence mañana',sub:'Programar la interfaz — tienes solo 20% de avance. ¡Actúa hoy!',date:'28 mayo 2026'},
+  {type:'warn',dot:'edw',title:'⚠️ Entrega próxima — Marco Teórico',sub:'Faltan 3 días. Avance actual: 60%. Recuerda alcanzar el 80% antes de entregar.',date:'27 mayo 2026'},
+  {type:'info',dot:'edi',title:'📅 Semana 6 en curso — Segundo Parcial',sub:'Esta semana: integración y pruebas de validación del proyecto integrador.',date:'27 mayo 2026'},
+  {type:'ok',dot:'edo',title:'✅ Primer Parcial aprobado',sub:'Tu equipo completó todos los entregables del Primer Parcial correctamente.',date:'12 may 2026'},
+  {type:'warn',dot:'edw',title:'📆 Revaloración disponible',sub:'Si reprobaste alguna actividad del parcial, la revaloración está activa este viernes.',date:'26 mayo 2026'},
+  {type:'info',dot:'edi',title:'📢 Tutoría este viernes',sub:'Sesión obligatoria de tutoría · Viernes 11:40–12:30 · Aula EDI03.',date:'25 mayo 2026'},
+];
+
+/* ══ STATE ══ */
+let pwdChanged=false,curEmail='',chartInst=null,notifOpen=false,curRole='',curGroup='MEC04A';
+
+/* ══ ROLE SWITCH ══ */
+function setRole(r){
+  document.getElementById('role-v').value=r;
+  const sub=document.getElementById('lsub'),hc=document.getElementById('hc'),btn=document.getElementById('lbtn');
+  if(r==='student'){
+    sub.textContent='Portal de Alumnos';hc.textContent='300998';btn.textContent='Iniciar Sesión Estudiante';
+    document.getElementById('tab-s').classList.add('active');document.getElementById('tab-t').classList.remove('active');
+  } else {
+    sub.textContent='Portal Cuerpo Docente';hc.textContent='753195';btn.textContent='Iniciar Sesión Docente';
+    document.getElementById('tab-t').classList.add('active');document.getElementById('tab-s').classList.remove('active');
+  }
+}
+
+/* ══ LOGIN ══ */
+function doLogin(e){
+  e.preventDefault();
+  const email=document.getElementById('ie').value,pass=document.getElementById('ip').value,role=document.getElementById('role-v').value;
+  if(!email.endsWith('@utsc.edu.mx')){alert('⚠️ Usa un correo institucional @utsc.edu.mx');return;}
+  curEmail=email;curRole=role;
+  if(role==='student'){
+    if(pass==='300998'&&!pwdChanged){document.getElementById('modal-pwd').classList.remove('hidden');}
+    else{enterStudent();}
+  } else {
+    if(pass==='753195'){enterTeacher();}else{alert('⚠️ Clave docente incorrecta.');}
+  }
+}
+function savePwd(){
+  const v=document.getElementById('inp-np').value;
+  if(!v||v.length<4){alert('Mínimo 4 caracteres.');return;}
+  pwdChanged=true;document.getElementById('modal-pwd').classList.add('hidden');enterStudent();
+}
+
+/* ══ STUDENT DASHBOARD ══ */
+function enterStudent(){
+  document.getElementById('login-page').classList.add('hidden');
+  document.getElementById('student-app').classList.remove('hidden');
+  const alias=curEmail.split('@')[0].replace(/\./g,' ');
+  const av=alias.split(' ').map(x=>x[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('sname').textContent=alias.toUpperCase();
+  document.getElementById('sfull').textContent=curEmail;
+  document.getElementById('smail').textContent=curEmail;
+  document.getElementById('sav').textContent=av;
+  document.getElementById('sav2').textContent=av;
+  buildWeeks();
+  buildStudentNotifs();
+  updateNotifBadge('stu');
+}
+
+function buildStudentNotifs(){
+  const cont=document.getElementById('stu-notif-inline');
+  cont.innerHTML='';
+  NOTIFS_STUDENT.forEach(n=>{
+    const cls='sev-'+n.type;
+    const dot=n.dot.replace('ed','');
+    const dotBg={'d':'#ef4444','w':'#f59e0b','i':'#3b82f6','o':'#34d399'}[dot]||'#888';
+    cont.innerHTML+=`<div class="sev-item ${cls}"><div style="width:8px;height:8px;border-radius:50%;background:${dotBg};margin-top:4px;flex-shrink:0;"></div><div><div class="sev-title">${n.title}</div><div class="sev-sub">${n.sub}</div><div class="sev-date">${n.date}</div></div></div>`;
+  });
+}
+
+/* ══ TEACHER DASHBOARD ══ */
+function enterTeacher(){
+  document.getElementById('login-page').classList.add('hidden');
+  document.getElementById('teacher-app').classList.remove('hidden');
+  document.getElementById('tmail').textContent=curEmail;
+  document.getElementById('tav').textContent=curEmail[0].toUpperCase();
+  selectGroup('MEC04A');
+  buildCalEvents();
+  buildTeacherNotifs();
+  updateNotifBadge('tch');
+  setTimeout(initChart,80);
+}
+
+function selectGroup(gid){
+  curGroup=gid;
+  Object.keys(GROUPS).forEach(k=>{
+    const btn=document.getElementById('grp-'+k);
+    if(btn)btn.className='grp-btn'+(k===gid?' active':'');
+  });
+  const g=GROUPS[gid];
+  document.getElementById('grp-title').textContent=g.name;
+  document.getElementById('grp-count').textContent=g.count+' alumnos';
+  document.getElementById('grp-horario-lbl').textContent=gid;
+  document.getElementById('t-stat-alumnos').textContent=g.count;
+  document.getElementById('t-stat-equipos').textContent=g.equipos;
+  document.getElementById('t-stat-pct').textContent=g.avance+'%';
+  document.getElementById('t-stat-tareas').textContent=g.riesgo;
+  buildStudentList(gid);
+  buildSemaforo(gid);
+  if(chartInst) updateChart(g.avance,g.rezago);
+}
+
+function buildStudentList(gid){
+  const g=GROUPS[gid];
+  const list=document.getElementById('stu-list');
+  list.innerHTML='';
+  const seed=gid.charCodeAt(3);
+  for(let i=0;i<Math.min(g.count,NAMES_POOL.length);i++){
+    const idx=(i+seed)%NAMES_POOL.length;
+    const name=NAMES_POOL[idx];
+    const pct=Math.floor(20+((idx*17+seed*7)%65));
+    const color=COLS[i%COLS.length];
+    const av=name.split(' ').map(x=>x[0]).join('').substring(0,2);
+    const pctColor=pct<40?'#f87171':pct<70?'#f59e0b':'#34d399';
+    const barColor=pct<40?'#f87171':pct<70?'#f59e0b':'#34d399';
+    list.innerHTML+=`<div class="stu-row">
+      <div class="sav" style="background:${color};">${av}</div>
+      <div class="sinfo"><div class="sname">${name}</div><div class="smat">${gid} · ${i%4===0?'Rezago':'Activo'}</div></div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="spbar"><div class="spfill" style="width:${pct}%;background:${barColor};"></div></div>
+        <span class="spct" style="color:${pctColor};">${pct}%</span>
+      </div>
+    </div>`;
+  }
+}
+
+function buildSemaforo(gid){
+  const g=GROUPS[gid];
+  const wrap=document.getElementById('semaforo-wrap');
+  const tasks=[
+    {name:'Campaña Integrada',pct:g.avance},
+    {name:'Marco Teórico',pct:Math.min(100,g.avance+37)},
+    {name:'Interfaz Digital',pct:Math.max(5,g.avance-15)},
+    {name:'Informe Final',pct:Math.max(0,g.avance-22)}
+  ];
+  wrap.innerHTML=tasks.map(t=>{
+    const c=t.pct<40?'#f87171':t.pct<70?'#f59e0b':'#34d399';
+    return `<div style="margin-bottom:10px;">
+      <div class="slbl"><span class="snm">${t.name}</span><span class="sprc" style="color:${c};">${t.pct}%</span></div>
+      <div class="sbar"><div class="sfill" style="width:${t.pct}%;background:linear-gradient(90deg,${c},${c}cc);"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function buildCalEvents(){
+  const ev=document.getElementById('cal-events');
+  ev.innerHTML=`
+    <div class="ev-item ev-danger"><div class="ev-dot edd"></div><div class="ev-body"><div class="ev-title">Cierre Parcial 2</div><div class="ev-sub">Entrega de actas evaluación</div><div class="ev-date">18 jun 2026</div></div></div>
+    <div class="ev-item ev-warn"><div class="ev-dot edw"></div><div class="ev-body"><div class="ev-title">Revaloración Parcial</div><div class="ev-sub">Aplicación a grupos activos</div><div class="ev-date">19–20 jun 2026</div></div></div>
+    <div class="ev-item ev-info"><div class="ev-dot edi"></div><div class="ev-body"><div class="ev-title">Captura Calificaciones</div><div class="ev-sub">Estadías · Servicios Escolares</div><div class="ev-date">22 jun 2026</div></div></div>
+    <div class="ev-item ev-purple"><div class="ev-dot edp"></div><div class="ev-body"><div class="ev-title">Actualización Docentes</div><div class="ev-sub">Reunión de academia semanal</div><div class="ev-date">28 may 2026</div></div></div>
+    <div class="ev-item ev-ok"><div class="ev-dot edo"></div><div class="ev-body"><div class="ev-title">Inicio 3er Cuatrimestre</div><div class="ev-sub">Próximo periodo académico</div><div class="ev-date">31 ago 2026</div></div></div>
+  `;
+}
+
+function buildTeacherNotifs(){
+  const wrap=document.getElementById('tch-notif-inline');
+  wrap.innerHTML='';
+  NOTIFS_TEACHER.slice(0,5).forEach(n=>{
+    wrap.innerHTML+=`<div class="ev-item ev-${n.type}"><div class="ev-dot ${n.dot}"></div><div class="ev-body"><div class="ev-title">${n.title}</div><div class="ev-sub">${n.sub}</div><div class="ev-date">${n.date}</div></div></div>`;
+  });
+}
+
+/* ══ NOTIFICATION PANEL ══ */
+function toggleNotif(){
+  notifOpen=!notifOpen;
+  const panel=document.getElementById('notif-panel');
+  panel.classList.toggle('open',notifOpen);
+  const notifs=curRole==='teacher'?NOTIFS_TEACHER:NOTIFS_STUDENT;
+  const list=document.getElementById('notif-list');
+  list.innerHTML='';
+  notifs.forEach((n,i)=>{
+    const dotBg={'edd':'#ef4444','edw':'#f59e0b','edi':'#3b82f6','edo':'#34d399','edp':'#8b5cf6'}[n.dot]||'#888';
+    list.innerHTML+=`<div class="notif-item${i<3?' unread':''}">
+      <div class="notif-dot" style="background:${dotBg};"></div>
+      <div class="notif-body">
+        <div class="notif-title">${n.title}</div>
+        <div class="notif-sub">${n.sub}</div>
+        <div class="notif-time">${n.date}</div>
+      </div>
+    </div>`;
+  });
+}
+
+function updateNotifBadge(who){
+  const unread=curRole==='teacher'?5:3;
+  const el=document.getElementById(who+'-notif-count');
+  if(el)el.textContent=unread;
+}
+
+/* ══ CHART ══ */
+function initChart(){
+  const ctx=document.getElementById('tchart');
+  if(!ctx)return;
+  const g=GROUPS[curGroup];
+  if(chartInst)chartInst.destroy();
+  chartInst=new Chart(ctx.getContext('2d'),{
+    type:'doughnut',
+    data:{labels:['Aportación','Rezago'],datasets:[{data:[g.avance,g.rezago],backgroundColor:['#34d399','#f87171'],borderColor:'#12261a',borderWidth:2}]},
+    options:{responsive:true,plugins:{legend:{display:false}},cutout:'78%'}
+  });
+}
+function updateChart(a,r){
+  if(!chartInst)return;
+  chartInst.data.datasets[0].data=[a,r];
+  chartInst.update();
+}
+
+/* ══ WEEKS ══ */
+function buildWeeks(){
+  const row=document.getElementById('weeks-row');
+  row.innerHTML='';
+  for(let i=1;i<=11;i++){
+    const btn=document.createElement('button');
+    btn.className='wbtn'+(i<6?' past':i===6?' cur':'');
+    btn.onclick=()=>showWeek(i);
+    btn.innerHTML=`<span class="wlbl">Sem</span><span class="wnum">${i}</span>${i===6?'<span class="whoy">HOY</span>':''}`;
+    row.appendChild(btn);
+  }
+}
+function showWeek(n){
+  document.getElementById('wilbl').textContent=`Semana ${n} · ${parc(n)}${n===6?' (Actual)':''}`;
+  document.getElementById('witxt').textContent=WEEKS[n];
+  document.querySelectorAll('.wbtn').forEach((b,i)=>{
+    b.className='wbtn'+(i+1<6?' past':i+1===6?' cur':'');
+    b.style.outline=i+1===n?'2px solid var(--gm)':'';
+  });
+}
+
+/* ══ KANBAN ══ */
+function moveTask(id,col){
+  const t=document.getElementById(id),dest=document.getElementById(col);
+  if(col==='k-done'){
+    t.className='ktask ktdone';
+    t.innerHTML=`<div class="kbdg bgrn">Completado</div><div class="kttl">${t.querySelector('.kttl').textContent}</div>`;
+  } else {
+    const btn=t.querySelector('.kmove');
+    if(col==='k-review'){btn.textContent='Completar →';btn.onclick=()=>moveTask(id,'k-done');}
+  }
+  dest.appendChild(t);
+}
+
+/* ══ TEAM ══ */
+function createTeam(){
+  const p=document.getElementById('iproj').value,inv=document.getElementById('iinv').value;
+  if(!p){alert('Escribe el nombre del proyecto.');return;}
+  document.getElementById('tfw').classList.add('hidden');
+  document.getElementById('tiw').classList.remove('hidden');
+  document.getElementById('tpname').textContent=p;
+  if(inv){const li=document.createElement('li');li.textContent=inv;document.getElementById('tmemb').appendChild(li);}
+}
+
+/* ══ OBS ══ */
+function addObs(){
+  const inp=document.getElementById('obs-inp'),txt=inp.value.trim();
+  if(!txt)return;
+  const list=document.getElementById('obs-list');
+  const el=document.createElement('div');
+  el.style.cssText='padding:8px 10px;background:rgba(255,255,255,.04);border-radius:6px;margin-bottom:6px;font-size:12px;color:rgba(255,255,255,.6);border-left:3px solid var(--gm);';
+  el.textContent='['+new Date().toLocaleDateString('es-MX')+'] '+txt;
+  list.appendChild(el);
+  inp.value='';
+}
+
+/* ══ LOGOUT ══ */
+function logout(){
+  ['student-app','teacher-app'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  document.getElementById('login-page').classList.remove('hidden');
+  document.getElementById('weeks-row').innerHTML='';
+  document.getElementById('notif-panel').classList.remove('open');
+  notifOpen=false;curRole='';
+  setRole('student');
+}
+</script>
+</body>
+</html>
